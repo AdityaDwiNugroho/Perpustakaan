@@ -1,0 +1,163 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum userRole {
+  ADMINISTRATOR
+  PETUGAS
+  PEMINJAM
+}
+
+model User {
+  id         String   @id @default(uuid()) @db.Char(36)
+  fullname   String
+  username   String   @unique
+  email      String   @unique
+  password   String
+  // phone BigInt
+  phone      String   @unique
+  gender     String
+  birthdate  DateTime
+  role       userRole @default(PEMINJAM)
+  photo      String?  @default("/default-avatar.png")
+  address    String?
+  is_verify  Boolean  @default(false)
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  last_login DateTime?
+
+  peminjaman Peminjaman[]
+  ulasan Ulasan[]
+  pengumuman Pengumuman[]
+  settings Settings[]
+}
+
+enum statusBuku {
+  TIDAK_TERSEDIA
+  TERSEDIA    // Bisa dipinjam
+  DIPINJAM    // Sedang dipinjam oleh seseorang
+  DIBLOKIR    // Tidak bisa dipinjam (misalnya, rusak/hilang)
+  DIRESERVASI // Sudah dipesan tapi belum diambil
+}
+
+
+model Buku {
+  id           String   @id @default(uuid()) @db.Char(36)
+  judul        String
+  pengarang    String
+  penerbit     String
+  tahun_terbit DateTime
+  jumlah       Int
+  cover        String
+  status       statusBuku @default(TERSEDIA)
+  kode_buku    String
+  sinopsis     String?
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  categories BookCategory[]
+  peminjaman Peminjaman[]
+  book Ulasan[]
+}
+
+model Category {
+  id   String @id @default(uuid()) @db.Char(36)
+  name String @unique
+
+  books BookCategory[]
+}
+
+model BookCategory {
+  id         String @id @default(uuid()) @db.Char(36)
+  bookId     String
+  categoryId String
+
+  book     Buku     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([bookId, categoryId])
+}
+
+enum statusPinjaman {
+  PENDING // Masuk ke dalam keranjang pengajuan peminjaman
+  DIAJUKAN // Saat user mengajukan permintaan peminjaman
+  DISETUJUI // Saat petugas menyetujui peminjaman
+  DIPINJAM // Saat user sudah meminjam buku
+  DIPERPANJANG // Saat user memperpanjang peminjaman
+  DIKEMBALIKAN // Saat user mengembalikan buku
+  DIBATALKAN // Petugas atau peminjam membatalkan permintaan sebelum disetujui.
+  DITOLAK // Saat petugas menolak permintaan peminjaman
+  TERLAMBAT // Tidak dikembalikan tepat waktu, bisa kena denda
+  DIBERHENTIKAN // Petugas bisa membatalkan peminjaman meski buku belum dikembalikan (misalnya, karena pelanggaran aturan).
+  MENDEKATI_TANGGAL_PENGEMBALIAN // Saat peminjaman sudah mendekati batas waktu pengembalian
+}
+
+model Peminjaman {
+  id         String    @id @default(uuid()) @db.Char(36)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  book       Buku      @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookId     String
+  borrowedAt DateTime  @default(now())
+  dueDate    DateTime
+  status    statusPinjaman    @default(PENDING)
+  returnedAt DateTime?
+
+  // Relasi untuk menyimpan riwayat perpanjangan
+  
+  // Jika perpanjangan, simpan ID peminjaman sebelumnya -- sebagai parentLoanId
+  parentLoanId String?       
+  parentLoan   Peminjaman?   @relation("LoanExtension", fields: [parentLoanId], references: [id])
+  extensions   Peminjaman[]  @relation("LoanExtension")
+}
+
+
+model Ulasan {
+  id        String   @id @default(uuid()) @db.Char(36)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  book      Buku     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookId    String
+  rating    Int
+  comment   String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+enum kategoriPengumuman {
+  INFORMASI
+  EVENT
+  PERUBAHAN_KEBIJAKAN
+  PERINGATAN
+}
+
+model Pengumuman {
+  id String @id @default(uuid()) @db.Char(36)
+  judul String
+  isi String
+  kategori kategoriPengumuman
+  dibuat_oleh User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  is_active Boolean @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+
+model Settings {
+  id String @id @default(uuid()) @db.Char(36)
+  key String @unique
+  value String
+  updated_by String?
+  updated_at DateTime @updatedAt
+  updatedBy User? @relation(fields: [updated_by], references: [id])
+}
