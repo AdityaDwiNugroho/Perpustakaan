@@ -1,5 +1,3 @@
-# Nuxt Minimal Starter
-
 [![GitHub license](https://img.shields.io/github/license/AdityaDwiNugroho/UKKPerpus.svg)](https://github.com/AdityaDwiNugroho/UKKPerpus/blob/master/LICENSE)
 [![GitHub contributors](https://img.shields.io/github/contributors/AdityaDwiNugroho/UKKPerpus.svg)](https://GitHub.com/AdityaDwiNugroho/UKKPerpus/graphs/contributors/)
 [![GitHub issues](https://img.shields.io/github/issues/AdityaDwiNugroho/UKKPerpus.svg)](https://GitHub.com/AdityaDwiNugroho/UKKPerpus/issues/)
@@ -9,6 +7,8 @@
 [![GitHub watchers](https://img.shields.io/github/watchers/AdityaDwiNugroho/UKKPerpus.svg?style=social&label=Watch)](https://GitHub.com/AdityaDwiNugroho/UKKPerpus/watchers/)
 [![GitHub forks](https://img.shields.io/github/forks/AdityaDwiNugroho/UKKPerpus.svg?style=social&label=Fork)](https://GitHub.com/AdityaDwiNugroho/UKKPerpus/network/)
 [![GitHub stars](https://img.shields.io/github/stars/AdityaDwiNugroho/UKKPerpus.svg?style=social&label=Star)](https://GitHub.com/AdityaDwiNugroho/UKKPerpus/stargazers/)
+
+# Nuxt Minimal Starter
 
 Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
